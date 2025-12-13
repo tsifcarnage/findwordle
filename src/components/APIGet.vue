@@ -20,7 +20,7 @@ export default {
 
           localStorage.setItem("wordleWord", word);
 
-          this.$emit("word-ready", word);
+          this.$emit("word-ready", word); // a mettre dans input.vue @word-redy="taFonction"
         } catch (error) {
           console.error("Erreur de recuperation:", error);
         }
