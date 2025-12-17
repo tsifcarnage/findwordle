@@ -35,6 +35,7 @@ export default {
     }
 
     this.solution = solution.toUpperCase();
+    console.log(this.solution);
   },
 };
 </script>

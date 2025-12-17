@@ -1,12 +1,10 @@
 <script>
 import Nav from "./components/Nav.vue";
-import APIGet from "./components/APIGet.vue";
 import GameBoard from "./components/GameBoard.vue";
 
 export default {
   components: {
     Nav,
-    APIGet,
     GameBoard,
   },
 
