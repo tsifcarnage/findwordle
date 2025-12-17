@@ -1,9 +1,15 @@
 <script>
 import Nav from "./components/Nav.vue";
 import GameBoard from "./components/GameBoard.vue";
+import Keyboard from "./components/Keyboard.vue";
 
 export default {
-  components: { Nav, GameBoard },
+  components: {
+    Nav,
+    GameBoard,
+    Keyboard,
+  },
+
 
   data() {
     return {
@@ -76,6 +82,7 @@ export default {
   <div class="app">
     <Nav />
     <GameBoard :board="board" />
+    <Keyboard />
   </div>
 </template>
 
