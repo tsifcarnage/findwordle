@@ -1,11 +1,13 @@
 <script>
 import Nav from "./components/Nav.vue";
 import GameBoard from "./components/GameBoard.vue";
+import Keyboard from "./components/Keyboard.vue";
 
 export default {
   components: {
     Nav,
     GameBoard,
+    Keyboard,
   },
 
   data() {
@@ -35,6 +37,7 @@ export default {
     <Nav />
     <!-- Grille du jeu (ton travail commence ici) -->
     <GameBoard :board="board" />
+    <Keyboard />
   </div>
 </template>
 
