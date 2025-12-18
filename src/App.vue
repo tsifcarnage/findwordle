@@ -27,6 +27,9 @@ export default {
   },
 
   methods: {
+    normalizeString(str) {
+      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    },
     handlePhysicalKey(event) {
       if (this.currentRow >= 6) return;
 
@@ -88,36 +91,45 @@ export default {
     testWord(word) {
       if (this.currentRow >= 6) return;
 
-      word = word.toUpperCase();
+      const row = this.board[this.currentRow];
 
-      word.split("").forEach((letter, index) => {
-        this.board[this.currentRow][index].letter = letter;
+      // On garde le mot original pour l'affichage
+      const originalWord = word.toUpperCase();
+
+      // Normalisation pour comparaison
+      const normalizedSolution = this.normalizeString(this.solution);
+      const normalizedWord = this.normalizeString(originalWord);
+
+      // Mettre à jour les lettres du tableau avec le mot original
+      originalWord.split("").forEach((letter, index) => {
+        row[index].letter = letter; // <- conserve les accents pour l'affichage
       });
 
-      this.checkRow(this.currentRow);
+      // Vérifier la ligne en utilisant les versions normalisées
+      this.checkRow(row, normalizedSolution, normalizedWord);
 
-      this.updateKeyboardStatus(this.board[this.currentRow]);
-
+      // Mettre à jour le clavier
+      this.updateKeyboardStatus(row);
       this.currentRow++;
     },
 
-    checkRow(rowIndex) {
-      const row = this.board[rowIndex];
-      const solutionLetters = this.solution.split("");
+    checkRow(row, normalizedSolution, normalizedWord) {
+      const solutionLetters = normalizedSolution.split("");
 
-      // 1️⃣ VERT : bonne lettre, bonne position
+      // 1. Vert : bonne lettre, bonne position
       row.forEach((cell, index) => {
-        if (cell.letter === solutionLetters[index]) {
+        if (normalizedWord[index] === solutionLetters[index]) {
           cell.status = "correct";
           solutionLetters[index] = null;
         }
       });
 
-      // 2️⃣ JAUNE / ROUGE
-      row.forEach((cell) => {
+      // 2. Jaune / Rouge : lettre présente mais mauvaise position ou absente
+      row.forEach((cell, index) => {
         if (cell.status) return;
 
-        const foundIndex = solutionLetters.indexOf(cell.letter);
+        const normalizedLetter = this.normalizeString(cell.letter);
+        const foundIndex = solutionLetters.indexOf(normalizedLetter);
 
         if (foundIndex !== -1) {
           cell.status = "present";
@@ -148,7 +160,7 @@ export default {
 </script>
 
 <template>
-  <div class="app">
+  <div class="flex flex-col items-center gap-5">
     <Nav />
     <GameBoard :board="board" />
     <Keyboard
@@ -159,11 +171,4 @@ export default {
   </div>
 </template>
 
-<style scoped>
-.app {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
-</style>
+<style scoped></style>
