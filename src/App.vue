@@ -2,7 +2,7 @@
 import Nav from "./components/Nav.vue";
 import GameBoard from "./components/GameBoard.vue";
 import Keyboard from "./components/Keyboard.vue";
-
+import { getWordleWord } from "./services/apiGet.js";
 export default {
   components: {
     Nav,
@@ -10,56 +10,126 @@ export default {
     Keyboard,
   },
 
-
   data() {
     return {
-      // 🔴 TEMPORAIRE pour tests (sera relié à l’API plus tard)
       solution: "APPLE",
 
       board: Array.from({ length: 6 }, () =>
-          Array.from({ length: 5 }, () => ({
-            letter: "",
-            status: "", // correct | present | absent
-          }))
+        Array.from({ length: 5 }, () => ({
+          letter: "",
+          status: "",
+        }))
       ),
 
       currentRow: 0,
+      keyboardStatus: {},
     };
   },
 
   methods: {
+    normalizeString(str) {
+      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    },
+    handlePhysicalKey(event) {
+      if (this.currentRow >= 6) return;
+
+      const key = event.key.toUpperCase();
+
+      if (key === "BACKSPACE") {
+        this.handleKeyPress("DEL");
+      } else if (key === "ENTER") {
+        const row = this.board[this.currentRow];
+        const word = row.map((c) => c.letter).join("");
+
+        if (word.length === 5) {
+          this.testWord(word);
+        }
+      } else if (/^[A-Z]$/.test(key)) {
+        this.handleKeyPress(key);
+      }
+    },
+
+    handleKeyPress(key) {
+      if (this.currentRow >= 6) return;
+
+      const row = this.board[this.currentRow];
+
+      if (key === "DEL") {
+        for (let i = 4; i >= 0; i--) {
+          if (row[i].letter) {
+            row[i].letter = "";
+            break;
+          }
+        }
+      } else if (key === "ENTER") {
+        return;
+      } else {
+        for (let i = 0; i < 5; i++) {
+          if (!row[i].letter) {
+            row[i].letter = key;
+            break;
+          }
+        }
+      }
+    },
+    updateKeyboardStatus(row) {
+      row.forEach(({ letter, status }) => {
+        const current = this.keyboardStatus[letter];
+
+        // priorité : correct > present > absent
+        if (
+          current === "correct" ||
+          (current === "present" && status === "absent")
+        ) {
+          return;
+        }
+
+        this.keyboardStatus[letter] = status;
+      });
+    },
+
     testWord(word) {
       if (this.currentRow >= 6) return;
 
-      word = word.toUpperCase();
+      const row = this.board[this.currentRow];
 
-      word.split("").forEach((letter, index) => {
-        this.board[this.currentRow][index].letter = letter;
+      // On garde le mot original pour l'affichage
+      const originalWord = word.toUpperCase();
+
+      // Normalisation pour comparaison
+      const normalizedSolution = this.normalizeString(this.solution);
+      const normalizedWord = this.normalizeString(originalWord);
+
+      // Mettre à jour les lettres du tableau avec le mot original
+      originalWord.split("").forEach((letter, index) => {
+        row[index].letter = letter; // <- conserve les accents pour l'affichage
       });
 
-      // 👉 vérification Wordle
-      this.checkRow(this.currentRow);
+      // Vérifier la ligne en utilisant les versions normalisées
+      this.checkRow(row, normalizedSolution, normalizedWord);
 
+      // Mettre à jour le clavier
+      this.updateKeyboardStatus(row);
       this.currentRow++;
     },
 
-    checkRow(rowIndex) {
-      const row = this.board[rowIndex];
-      const solutionLetters = this.solution.split("");
+    checkRow(row, normalizedSolution, normalizedWord) {
+      const solutionLetters = normalizedSolution.split("");
 
-      // 1️⃣ VERT : bonne lettre, bonne position
+      // 1. Vert : bonne lettre, bonne position
       row.forEach((cell, index) => {
-        if (cell.letter === solutionLetters[index]) {
+        if (normalizedWord[index] === solutionLetters[index]) {
           cell.status = "correct";
           solutionLetters[index] = null;
         }
       });
 
-      // 2️⃣ JAUNE / ROUGE
-      row.forEach((cell) => {
+      // 2. Jaune / Rouge : lettre présente mais mauvaise position ou absente
+      row.forEach((cell, index) => {
         if (cell.status) return;
 
-        const foundIndex = solutionLetters.indexOf(cell.letter);
+        const normalizedLetter = this.normalizeString(cell.letter);
+        const foundIndex = solutionLetters.indexOf(normalizedLetter);
 
         if (foundIndex !== -1) {
           cell.status = "present";
@@ -70,27 +140,35 @@ export default {
       });
     },
   },
+  beforeUnmount() {
+    window.removeEventListener("keydown", this.handlePhysicalKey);
+  },
 
-  mounted() {
-    window.testWord = this.testWord;
-    console.log("👉 testWord('APPLE') disponible");
+  mounted: async function () {
+    let solution = localStorage.getItem("wordleWord");
+
+    if (!solution) {
+      solution = await getWordleWord();
+      localStorage.setItem("wordleWord", solution);
+    }
+
+    this.solution = solution.toUpperCase();
+    console.log("Solution :", this.solution);
+    window.addEventListener("keydown", this.handlePhysicalKey);
   },
 };
 </script>
 
 <template>
-  <div class="app">
+  <div class="flex flex-col items-center gap-5">
     <Nav />
     <GameBoard :board="board" />
-    <Keyboard />
+    <Keyboard
+      @submit-word="testWord"
+      @key-press="handleKeyPress"
+      :keyboardStatus="keyboardStatus"
+    />
   </div>
 </template>
 
-<style scoped>
-.app {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
-</style>
+<style scoped></style>
