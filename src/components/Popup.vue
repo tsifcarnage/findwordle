@@ -6,7 +6,12 @@
           <h2 class="popup-title">Info</h2>
         </slot>
 
-        <button class="popup-x" type="button" @click="$emit('close')" aria-label="Fermer">
+        <button
+          class="popup-x"
+          type="button"
+          @click="$emit('close')"
+          aria-label="Fermer"
+        >
           ✕
         </button>
       </header>
@@ -17,7 +22,9 @@
 
       <footer class="popup-actions">
         <slot name="actions">
-          <button class="popup-btn ghost" type="button" @click="$emit('close')">Fermer</button>
+          <button class="popup-btn ghost" type="button" @click="$emit('close')">
+            Fermer
+          </button>
         </slot>
       </footer>
     </div>

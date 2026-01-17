@@ -21,7 +21,7 @@ export default {
         Array.from({ length: 5 }, () => ({
           letter: "",
           status: "",
-        }))
+        })),
       ),
 
       currentRow: 0,
@@ -40,6 +40,8 @@ export default {
         currentRow: this.currentRow,
         keyboardStatus: this.keyboardStatus,
         solution: this.solution,
+        win: this.win,
+        gameOver: this.gameOver,
       };
       localStorage.setItem("wordleGameState", JSON.stringify(gameState));
     },
@@ -53,12 +55,15 @@ export default {
       this.currentRow = state.currentRow;
       this.keyboardStatus = state.keyboardStatus;
       this.solution = state.solution;
+      this.win = state.win ?? false;
+      this.gameOver = state.gameOver ?? false;
+
+      // Si la partie était finie, on réaffiche la popup
+      if (this.gameOver) {
+        this.showPopup = true;
+      }
+
       return true;
-    },
-    resetGame() {
-      //permet denlever le localstorage, a utiliser quand condition=trouver
-      localStorage.removeItem("wordleGameState");
-      location.reload();
     },
 
     normalizeString(str) {
@@ -128,7 +133,6 @@ export default {
       if (this.currentRow >= 6 || this.gameOver) return;
 
       const row = this.board[this.currentRow];
-
       const originalWord = word.toUpperCase();
 
       const normalizedSolution = this.normalizeString(this.solution);
@@ -139,26 +143,23 @@ export default {
       });
 
       this.checkRow(row, normalizedSolution, normalizedWord);
-
       this.updateKeyboardStatus(row);
 
       const isWin = row.every((cell) => cell.status === "correct");
+
       if (isWin) {
         this.win = true;
         this.gameOver = true;
         this.showPopup = true;
-        return;
-      }
-
-      const isLastRow = this.currentRow === 5;
-      if (isLastRow) {
+      } else if (this.currentRow === 5) {
         this.win = false;
         this.gameOver = true;
         this.showPopup = true;
-        return;
+      } else {
+        this.currentRow++;
       }
 
-      this.currentRow++;
+      // On sauvegarde TOUJOURS, même si c'est fini
       this.saveGame();
     },
 
@@ -192,20 +193,10 @@ export default {
     },
 
     restartGame() {
-      this.board = Array.from({ length: 6 }, () =>
-        Array.from({ length: 5 }, () => ({
-          letter: "",
-          status: "",
-        }))
-      );
-      this.currentRow = 0;
-      this.keyboardStatus = {};
-      this.showPopup = false;
-      this.win = false;
-      this.gameOver = false;
-
+      // Supprime tout pour repartir à zéro avec un nouveau mot
+      localStorage.removeItem("wordleGameState");
       localStorage.removeItem("wordleWord");
-      window.location.reload();
+      location.reload();
     },
   },
 
