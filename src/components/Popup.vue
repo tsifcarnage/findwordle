@@ -1,88 +1,117 @@
 <template>
-  <div class="backdrop">
-    <div class="modal">
-      <h2 class="title">
-        <span v-if="win">🎉 Bravo !</span>
-        <span v-else>😢 Perdu</span>
-      </h2>
+  <div class="popup-backdrop" @click.self="$emit('close')">
+    <div class="popup-modal" role="dialog" aria-modal="true">
+      <header class="popup-header">
+        <slot name="title">
+          <h2 class="popup-title">Info</h2>
+        </slot>
 
-      <p class="text">
-        <span v-if="win">Tu as trouvé le mot :</span>
-        <span v-else>Le mot était :</span>
-        <strong class="word">{{ solution }}</strong>
-      </p>
+        <button class="popup-x" type="button" @click="$emit('close')" aria-label="Fermer">
+          ✕
+        </button>
+      </header>
 
-      <button class="btn" @click="$emit('restart')">Rejouer</button>
-      <button class="btn ghost" @click="$emit('close')">Fermer</button>
+      <div class="popup-content">
+        <slot />
+      </div>
+
+      <footer class="popup-actions">
+        <slot name="actions">
+          <button class="popup-btn ghost" type="button" @click="$emit('close')">Fermer</button>
+        </slot>
+      </footer>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: {
-    win: {
-      type: Boolean,
-      required: true,
-    },
-    solution: {
-      type: String,
-      required: true,
-    },
-  },
+  emits: ["close"],
 };
 </script>
 
 <style scoped>
-.backdrop {
+/* ✅ Toujours au-dessus */
+.popup-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: grid;
-  place-items: center;
-  z-index: 1000;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 99999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 16px;
 }
 
-.modal {
-  background: #1f2937;
-  padding: 20px;
-  border-radius: 12px;
-  width: 320px;
-  text-align: center;
-  color: white;
+/* ✅ La fenêtre visible */
+.popup-modal {
+  background: #111827;
+  color: #ffffff;
+  width: min(460px, 95vw);
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  padding: 16px;
+
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45);
+
+  /* important : pas transparent */
+  opacity: 1;
 }
 
-.title {
-  margin-bottom: 10px;
+.popup-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.text {
-  margin-bottom: 15px;
+.popup-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
 }
 
-.word {
-  margin-left: 6px;
-  letter-spacing: 2px;
-}
-
-.btn {
-  width: 100%;
-  padding: 10px;
-  margin-top: 8px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.btn {
-  background: #22c55e;
-  color: black;
-}
-
-.ghost {
+.popup-x {
   background: transparent;
-  border: 1px solid #9ca3af;
+  border: none;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 6px 8px;
+}
+
+.popup-content {
+  margin-top: 12px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.popup-actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.popup-btn {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.popup-btn.primary {
+  background: #22c55e;
+  color: #0b1220;
+}
+
+.popup-btn.ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: white;
 }
 </style>

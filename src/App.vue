@@ -102,25 +102,19 @@ export default {
 
       const row = this.board[this.currentRow];
 
-      // On garde le mot original pour l'affichage
       const originalWord = word.toUpperCase();
 
-      // Normalisation pour comparaison
       const normalizedSolution = this.normalizeString(this.solution);
       const normalizedWord = this.normalizeString(originalWord);
 
-      // Mettre à jour les lettres du tableau avec le mot original
       originalWord.split("").forEach((letter, index) => {
-        row[index].letter = letter; // conserve les accents pour l'affichage
+        row[index].letter = letter;
       });
 
-      // Vérifier la ligne en utilisant les versions normalisées
       this.checkRow(row, normalizedSolution, normalizedWord);
 
-      // Mettre à jour le clavier
       this.updateKeyboardStatus(row);
 
-      // ✅ AJOUT : victoire/défaite + stop jeu + popup
       const isWin = row.every((cell) => cell.status === "correct");
       if (isWin) {
         this.win = true;
@@ -182,7 +176,6 @@ export default {
       this.win = false;
       this.gameOver = false;
 
-      // nouveau mot
       localStorage.removeItem("wordleWord");
       window.location.reload();
     },
@@ -219,13 +212,31 @@ export default {
       :keyboardStatus="keyboardStatus"
     />
 
-    <Popup
-      v-if="showPopup"
-      :win="win"
-      :solution="solution"
-      @close="closePopup"
-      @restart="restartGame"
-    />
+    <Popup v-if="showPopup" @close="closePopup">
+      <template #title>
+        <h2 class="text-xl font-bold">
+          <span v-if="win">🎉 Bravo !</span>
+          <span v-else>😢 Perdu</span>
+        </h2>
+      </template>
+
+      <p class="text-base">
+        <span v-if="win">Tu as trouvé le mot :</span>
+        <span v-else>Le mot était :</span>
+        <strong style="margin-left: 6px; letter-spacing: 2px">
+          {{ solution }}
+        </strong>
+      </p>
+
+      <template #actions>
+        <button class="btn primary" type="button" @click="restartGame">
+          Rejouer
+        </button>
+        <button class="btn ghost" type="button" @click="closePopup">
+          Fermer
+        </button>
+      </template>
+    </Popup>
   </div>
 </template>
 
