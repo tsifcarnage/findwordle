@@ -159,7 +159,6 @@ export default {
         this.currentRow++;
       }
 
-      // On sauvegarde TOUJOURS, même si c'est fini
       this.saveGame();
     },
 
@@ -193,7 +192,6 @@ export default {
     },
 
     restartGame() {
-      // Supprime tout pour repartir à zéro avec un nouveau mot
       localStorage.removeItem("wordleGameState");
       localStorage.removeItem("wordleWord");
       location.reload();
@@ -205,10 +203,8 @@ export default {
   },
 
   mounted: async function () {
-    // Charger la partie sauvegardée si elle existe
     const loaded = this.loadGame();
 
-    // Si aucune sauvegarde, charger le mot du jour
     if (!loaded) {
       let solution = localStorage.getItem("wordleWord");
 
