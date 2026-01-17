@@ -237,7 +237,7 @@ export default {
       <template #title>
         <h2 class="text-xl font-bold">
           <span v-if="win">🎉 Bravo !</span>
-          <span v-else>😢 Perdu</span>
+          <span v-else>☠️ Perdu !</span>
         </h2>
       </template>
 
