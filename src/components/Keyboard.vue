@@ -54,19 +54,24 @@ export default {
 };
 </script>
 <template>
-  <section class="flex flex-col gap-2 mt-10">
-    <!-- clavier -->
+  <section class="flex flex-col gap-1 mt-6 px-2 max-w-[480px] mx-auto">
     <div
-      class="flex justify-center gap-1"
       v-for="(row, index) in keyboard"
       :key="index"
+      class="flex justify-center gap-1.5"
     >
       <button
         v-for="key in row"
         :key="key"
         @click="pressKey(key)"
         :class="[
-          'px-4 py-4 rounded-md font-bold text-white text-lg transition-colors',
+          'px-3 sm:px-4 py-3.5 sm:py-4 rounded font-bold text-white text-base sm:text-lg transition-colors',
+          'min-h-[52px]',
+          'active:scale-[0.97]',
+          'touch-manipulation select-none',
+          key === 'ENTER' || key === 'DEL'
+            ? 'min-w-[70px] sm:min-w-[90px] text-sm'
+            : 'flex-1 max-w-11 sm:max-w-[52px]',
           keyClass(key),
         ]"
       >
