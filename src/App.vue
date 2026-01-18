@@ -258,6 +258,9 @@ export default {
         </button>
       </template>
     </Popup>
+    <footer class="fixed bottom-0 my-2">
+      <small>© Copyright Website by Tsif and Daniel</small>
+    </footer>
   </div>
 </template>
 
