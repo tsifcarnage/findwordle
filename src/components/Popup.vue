@@ -33,12 +33,12 @@
 
 <script>
 export default {
+  name: "popup",
   emits: ["close"],
 };
 </script>
 
 <style scoped>
-/* ✅ Toujours au-dessus */
 .popup-backdrop {
   position: fixed;
   inset: 0;
@@ -48,11 +48,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 16px;
 }
-
-/* ✅ La fenêtre visible */
 .popup-modal {
   background: #111827;
   color: #ffffff;
@@ -63,8 +60,6 @@ export default {
   padding: 16px;
 
   box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45);
-
-  /* important : pas transparent */
   opacity: 1;
 }
 
